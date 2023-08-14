@@ -16,15 +16,15 @@
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
       hpkgs = pkgs.haskellPackages.override {
         overrides = hnew: hold: {
-          template-project = hnew.callCabal2nix "template-project" ./. { };
+          poppen = hnew.callCabal2nix "poppen" ./. { };
         };
       };
     in
     {
-      defaultPackage.x86_64-linux =  hpkgs.template-project;
+      defaultPackage.x86_64-linux =  hpkgs.poppen;
       inherit pkgs;
       devShell.x86_64-linux = hpkgs.shellFor {
-        packages = ps : [ ps."template-project" ];
+        packages = ps : [ ps."poppen" ];
         withHoogle = true;
 
         buildInputs = [

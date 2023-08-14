@@ -1,16 +1,12 @@
 cabal-version:      3.0
 
--- This file has been generated from package.yaml by hpack version 0.34.7.
---
--- see: https://github.com/sol/hpack
-
-name:           template
+name:           poppen
 version:        1.0.0
-homepage:       https://github.com/jappeace/template#readme
-bug-reports:    https://github.com/jappeace/template/issues
+homepage:       https://github.com/jappeace/poppen#readme
+bug-reports:    https://github.com/jappeace/poppen/issues
 author:         Jappie Klooster
 maintainer:     jappieklooster@hotmail.com
-copyright:      2020 Jappie Klooster
+copyright:      2023 Jappie Klooster
 license:        MIT
 license-file:   LICENSE
 build-type:     Simple
@@ -21,7 +17,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/jappeace/template
+  location: https://github.com/jappeace/poppen
 
 common common-options
   default-extensions: 
@@ -61,9 +57,9 @@ common common-options
 library
   import: common-options
   exposed-modules:
-      Template
+      Poppen
   other-modules:
-      Paths_template
+      Paths_poppen
   hs-source-dirs:
       src
 
@@ -73,7 +69,7 @@ executable exe
   hs-source-dirs:
       app
   build-depends:
-      template
+      poppen
   ghc-options: -Wno-unused-packages
 
 test-suite unit
@@ -82,11 +78,11 @@ test-suite unit
   main-is: Test.hs
   ghc-options: -Wno-unused-packages
   other-modules:
-      Paths_template
+      Paths_poppen
   hs-source-dirs:
       test
   build-depends:
       tasty,
       tasty-hunit,
       tasty-quickcheck,
-      template
+      poppen
