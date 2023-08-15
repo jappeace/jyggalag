@@ -1,7 +1,7 @@
 
 module Main where
 
-import qualified Template
+import qualified Poppen
 
 main :: IO ()
-main = Template.main
+main = Poppen.main
