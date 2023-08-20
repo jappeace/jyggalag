@@ -14,7 +14,7 @@ import Data.Map
 
 data Project = MkProject {
     path :: FilePath
-  , ignoreActions :: FilePath
+  , ignoreActions :: [FilePath]
   } deriving (Generic, Show)
 
 newtype ProjectName = MkProjectName String
@@ -26,6 +26,7 @@ data ConfigFile = MkConfigFile {
   , template :: FilePath
   , projects :: Map ProjectName Project
   } deriving (Generic, Show)
+
 
 instance FromKey ProjectName where
   fromKey = fmap MkProjectName <$> fromKey

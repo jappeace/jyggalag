@@ -9,7 +9,7 @@ template = "haskell-template-project"
 
 [projects.plunder]
 path = "plunder"
-ignoreActions = "nightly.yaml"
+ignoreActions = ["nightly.yaml"]
 
 # [projects.persistent_mysql_haskell]
 # path = "persistent"

@@ -54,6 +54,8 @@ common common-options
       , optparse-applicative
       , toml-parser
       , containers
+      , directory
+      , filepath
 
   default-language: Haskell2010
 
