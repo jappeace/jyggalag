@@ -1,4 +1,4 @@
-project_dir = "/home/jappie/projects"
+projectDir = "/home/jappie/projects"
 template = "haskell-template-project"
 
 # [projects.mysql_haskell]
@@ -9,7 +9,7 @@ template = "haskell-template-project"
 
 [projects.plunder]
 path = "plunder"
-ignore = "nightly.yaml"
+ignoreActions = "nightly.yaml"
 
 # [projects.persistent_mysql_haskell]
 # path = "persistent"

@@ -17,7 +17,13 @@
       hpkgs = pkgs.haskellPackages.override {
         overrides = hnew: hold: {
           poppen = hnew.callCabal2nix "poppen" ./. { };
-        };
+          # test suite has to tight bounds
+          toml-parser = pkgs.haskell.lib.doJailbreak (hold.callHackageDirect {
+              pkg = "toml-parser";
+              ver = "1.3.0.0";
+              sha256 = "sha256-kQZhfMmjGqkHCOJy9IzCDrbDcNWAJUcSDk/S1gpG4r0=";
+          } {});
+          };
       };
     in
     {

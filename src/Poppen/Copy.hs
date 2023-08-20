@@ -4,10 +4,14 @@ module Poppen.Copy
   )
 where
 
+import Poppen.Toml
+
 data CopyOptions = CopyOptions {
   configFile :: FilePath
   }
 
 
 commandCopy :: CopyOptions -> IO ()
-commandCopy _ = pure ()
+commandCopy (CopyOptions path) = do
+  configFile <- parseConfig path
+  print configFile
