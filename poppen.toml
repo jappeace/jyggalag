@@ -1,6 +1,9 @@
 projectDir = "/home/jappie/projects"
 template = "haskell-template-project"
 
+# which branch to checkout from master
+workbranch = "dollhouse-changes"
+
 # [projects.mysql_haskell]
 # path = "mysql-haskell"
 

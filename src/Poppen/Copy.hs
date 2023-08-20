@@ -9,6 +9,7 @@ import qualified Data.Map as Map
 import System.Directory (listDirectory, createDirectoryIfMissing, copyFile)
 import System.FilePath ((</>))
 import Control.Monad (forM_)
+import qualified Poppen.Git as Git
 
 data CopyOptions = CopyOptions {
   configFile :: FilePath
@@ -21,24 +22,23 @@ commandCopy :: CopyOptions -> IO ()
 commandCopy (CopyOptions path) = do
   configFile <- Toml.parseConfig path
 
-  let templateProject = Toml.projectDir configFile </> Toml.template configFile
-      actionsPath = templateProject </> ".github" </> "workflows"
-  actionsToBeCopied <- listDirectory actionsPath
+  actionsToBeCopied <- listDirectory $ Toml.actionsPath configFile
 
-  forM_ actionsToBeCopied $ \action -> do
-    forM_ (Map.toList $ Toml.projects configFile) $ \(projetName, project) ->  do
+  forM_ (Map.toList $ Toml.projects configFile) $ \(projectName, project) ->  do
       isDirty <- Git.isBranchDirty (Toml.projectDir configFile) project
       if isDirty then
-        putStrLn $ "skipping " <> show projetName <> " because branch is dirty"
-      else
-        copyAction (Toml.projectDir configFile) action projectName project
+        putStrLn $ "skipping project " <> show projectName <> " because branch is dirty"
+      else do
+        Git.setWorkBranch (Toml.projectDir configFile) project $ Toml.workbranch configFile
+        forM_ actionsToBeCopied $ \action -> do
+          copyAction configFile action projectName project
 
-copyAction :: FilePath -> FilePath -> ProjectName -> Project -> IO ()
-copyAction projectDir action projectName project = do
-  putStrLn $ "copying over " <> action <> " into " <> show projetName
-  let fromPath = actionsPath </> action
+copyAction :: Toml.ConfigFile -> FilePath -> Toml.ProjectName -> Toml.Project -> IO ()
+copyAction configFile action projectName project = do
+  putStrLn $ "copying over " <> action <> " into " <> show projectName
+  let fromPath = Toml.actionsPath configFile </> action
   let projectActionsPath = Toml.projectDir configFile </> Toml.path project </> workflowPath
   createDirectoryIfMissing True projectActionsPath
   if elem action $ Toml.ignoreActions project then
-    putStrLn $ "ignoring " <> action <> " for " <> show projetName
+    putStrLn $ "ignoring " <> action <> " for " <> show projectName
   else copyFile fromPath $ projectActionsPath </> action

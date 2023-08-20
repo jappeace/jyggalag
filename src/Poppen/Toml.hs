@@ -3,6 +3,9 @@ module Poppen.Toml
   ( parseConfig
   , Project(..)
   , ConfigFile(..)
+  , ProjectName(..)
+  , actionsPath
+  , Branch(..)
   )
 where
 
@@ -12,6 +15,14 @@ import GHC.Generics
 import Toml.FromValue.Generic
 import Data.Foldable (traverse_)
 import Data.Map
+import System.FilePath ((</>))
+
+actionsPath :: ConfigFile -> FilePath
+actionsPath configFile =
+  templateProject </> ".github" </> "workflows"
+  where
+    templateProject = projectDir configFile </> template configFile
+
 
 data Project = MkProject {
     path :: FilePath
@@ -19,18 +30,24 @@ data Project = MkProject {
   } deriving (Generic, Show)
 
 newtype ProjectName = MkProjectName String
+  deriving newtype (Eq, Ord, Show)
+
+newtype Branch = MkBranch {unBranch :: String }
   deriving Show
-  deriving newtype (Eq, Ord)
 
 data ConfigFile = MkConfigFile {
     projectDir :: FilePath
   , template :: FilePath
   , projects :: Map ProjectName Project
+  , workbranch :: Branch
   } deriving (Generic, Show)
 
 
 instance FromKey ProjectName where
   fromKey = fmap MkProjectName <$> fromKey
+
+instance FromValue Branch where
+  fromValue = fmap MkBranch <$> fromValue
 
 instance FromValue ConfigFile where
   fromValue = parseTableFromValue genericParseTable
