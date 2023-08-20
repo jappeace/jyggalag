@@ -4,13 +4,16 @@ module Poppen
 where
 
 import Options.Applicative
-
-data CopyOptions = CopyOptions {
-  configFile :: FilePath
-  }
+import Poppen.Copy
+import Data.Foldable (fold)
 
 data Commands = NoOp
               | CopyOverActions CopyOptions
+
+notifyRun :: Commands -> IO ()
+notifyRun = \case
+  NoOp -> putStrLn ""
+  CopyOverActions _ -> putStrLn "running copy over github actions"
 
 parseConfigFile :: Parser FilePath
 parseConfigFile = strOption $ long "config" <> metavar "FILE" <> help "the configuration file" <> value "poppen.toml"
@@ -23,14 +26,20 @@ parseOptions = hsubparser $
       (progDesc "does nothing"))
   ,
   command "copy"
-    (info (CopyOverActions <$> parseConfigFile )
+    (info (CopyOverActions . CopyOptions  <$> parseConfigFile )
       (progDesc "copy over the actions in the managed projects"))
   ]
 
 main :: IO ()
-main = putStrLn "hello, world flaky"
+main = do
+  commands <- readCliOptions
+  notifyRun commands
+  case commands of
+    CopyOverActions copyOptions -> commandCopy copyOptions
+    NoOp -> putStrLn "do nothing"
 
-readCliOptions :: IO CliOptions
+
+readCliOptions :: IO Commands
 readCliOptions = do
   customExecParser (prefs showHelpOnError) $ info
     (helper <*> parseOptions)

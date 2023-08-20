@@ -1,0 +1,21 @@
+project_dir = "/home/jappie/projects"
+template = "haskell-template-project"
+
+# [projects.mysql_haskell]
+# path = "mysql-haskell"
+
+# [projects.poppen]
+# path = "poppen"
+
+[projects.plunder]
+path = "plunder"
+ignore = "nightly.yaml"
+
+# [projects.persistent_mysql_haskell]
+# path = "persistent"
+
+# [projects.llvm_party]
+# path = "llvm-party"
+
+# [projects.jappie_lang]
+# path = "jappie-lang"

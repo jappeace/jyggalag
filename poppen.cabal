@@ -59,6 +59,7 @@ library
   import: common-options
   exposed-modules:
       Poppen
+      Poppen.Copy
   other-modules:
       Paths_poppen
   hs-source-dirs:

@@ -1,7 +1,7 @@
 [![https://jappieklooster.nl](https://img.shields.io/badge/blog-jappieklooster.nl-lightgrey)](https://jappieklooster.nl/tag/haskell.html)
 [![Jappiejappie](https://img.shields.io/badge/discord-jappiejappie-black?logo=discord)](https://discord.gg/Hp4agqy)
 
-> Where haskell projects dance to your tune!
+> Am I a homogeneous dolls?
 
 This project makes some basic assumptions on maintenance allowing
 you to automate a bunch of things.
