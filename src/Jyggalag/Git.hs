@@ -5,6 +5,7 @@ module Jyggalag.Git
   , setWorkBranch
   , addStaging
   , createGitContext
+  , pull
   , commit
   , push
   , GitContext
@@ -55,6 +56,11 @@ revertSetBranch MkGitContext {..} branch = do
       $ setWorkingDir (projectDir </> path project)
       $ shell ("git checkout \"" <> branchToString branch <> "\"")
 
+pull :: GitContext -> IO ()
+pull MkGitContext {..} = do
+  runProcess_
+      $ setWorkingDir (projectDir </> path project)
+      $ shell ("git pull")
 
 addStaging :: GitContext -> FilePath -> IO ()
 addStaging MkGitContext {..} file =
