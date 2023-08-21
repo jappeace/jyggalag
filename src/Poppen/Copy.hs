@@ -10,6 +10,10 @@ import System.Directory (listDirectory, createDirectoryIfMissing, copyFile)
 import System.FilePath ((</>))
 import Control.Monad (forM_)
 import qualified Poppen.Git as Git
+import qualified Data.Text.IO as Text
+import qualified Data.Text as Text
+import Data.Foldable (traverse_)
+import Data.Traversable (forM)
 
 data CopyOptions = CopyOptions {
   configFile :: FilePath
@@ -24,14 +28,21 @@ commandCopy (CopyOptions path) = do
 
   actionsToBeCopied <- listDirectory $ Toml.actionsPath configFile
 
-  forM_ (Map.toList $ Toml.projects configFile) $ \(projectName, project) ->  do
-      isDirty <- Git.isBranchDirty (Toml.projectDir configFile) project
+  uris <- forM (Map.toList $ Toml.projects configFile) $ \(projectName, project) ->  do
+      let gitContext = Git.createGitContext (Toml.projectDir configFile) project
+      isDirty <- Git.isBranchDirty gitContext
       if isDirty then
-        putStrLn $ "skipping project " <> show projectName <> " because branch is dirty"
+        pure $ "skipping project " <> Text.pack (show projectName) <> " because branch is dirty"
       else do
-        Git.setWorkBranch (Toml.projectDir configFile) project $ Toml.workbranch configFile
+        Git.setWorkBranch gitContext $ Toml.workbranch configFile
         forM_ actionsToBeCopied $ \action -> do
           copyAction configFile action projectName project
+          Git.addStaging gitContext $ workflowPath </> action
+        Git.commit gitContext
+        Git.push gitContext $ Toml.workbranch configFile
+
+  traverse_ Text.putStrLn uris
+
 
 copyAction :: Toml.ConfigFile -> FilePath -> Toml.ProjectName -> Toml.Project -> IO ()
 copyAction configFile action projectName project = do

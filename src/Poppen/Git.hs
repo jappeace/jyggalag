@@ -1,24 +1,70 @@
+{-# LANGUAGE RecordWildCards #-}
 -- | Allows us to anwser questions and do action to git repositories
 module Poppen.Git
   ( isBranchDirty
   , setWorkBranch
+  , addStaging
+  , createGitContext
+  , commit
+  , push
+  , GitContext
   )
 where
 
 import Poppen.Toml
 import System.Process.Typed
 import System.FilePath ((</>))
+import Data.Text (Text)
+import Data.Text.Encoding (decodeUtf8)
+import Data.ByteString (toStrict)
+import qualified Data.Text as Text
 
-isBranchDirty :: FilePath -> Project -> IO Bool
-isBranchDirty projectDir project = do
+data GitContext = MkGitContext {
+    projectDir :: FilePath
+  , project :: Project
+  }
+
+createGitContext :: FilePath -> Project -> GitContext
+createGitContext = MkGitContext
+
+isBranchDirty :: GitContext -> IO Bool
+isBranchDirty MkGitContext {..} = do
   stdOut <- readProcessStdout_
       $ setWorkingDir (projectDir </> path project)
       $ shell "git status --porcelain=v2"
+  print stdOut
   pure $ stdOut /= mempty
 
 
-setWorkBranch :: FilePath -> Project -> Branch -> IO ()
-setWorkBranch projectDir project branch = do
+setWorkBranch :: GitContext -> Branch -> IO ()
+setWorkBranch MkGitContext {..} branch = do
   runProcess_
       $ setWorkingDir (projectDir </> path project)
-      $ shell ("git checkout -B " <> unBranch branch)
+      $ shell ("git checkout -B \"" <> unBranch branch <> "\" master")
+
+addStaging :: GitContext -> FilePath -> IO ()
+addStaging MkGitContext {..} file =
+  runProcess_
+      $ setWorkingDir (projectDir </> path project)
+      $ shell $ "git add \"" <> file <> "\""
+
+
+commit :: GitContext -> IO ()
+commit MkGitContext {..} =
+  runProcess_
+      $ setWorkingDir (projectDir </> path project)
+      $ shell "git commit -m \"jyggalag update\""
+
+push :: GitContext -> Branch -> IO Text
+push MkGitContext {..} branch = do
+  runProcess_
+      $ setWorkingDir (projectDir </> path project)
+      $ shell ("git push --set-upstream origin " <> unBranch branch)
+
+  stdOut <- readProcessStdout_
+      $ setWorkingDir (projectDir </> path project)
+      $ shell "git remote -v"
+
+  let uri = Text.takeWhile (/= '.') $ Text.dropWhile (/= ':') $ decodeUtf8 $ toStrict stdOut
+
+  pure $ "https://github.com/" <> uri  <> "/compare/new-commits?expand=1"
