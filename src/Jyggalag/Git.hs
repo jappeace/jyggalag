@@ -58,7 +58,7 @@ commit :: GitContext -> IO ()
 commit MkGitContext {..} =
   runProcess_
       $ setWorkingDir (projectDir </> path project)
-      $ shell "git commit -m \"jyggalag update\""
+      $ shell "git commit -m \"jyggalag update\n\n See https://github.com/jappeace/jyggalag\""
 
 push :: GitContext -> Branch -> IO Text
 push MkGitContext {..} branch = do
