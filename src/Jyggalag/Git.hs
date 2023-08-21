@@ -72,4 +72,4 @@ push MkGitContext {..} branch = do
 
   let uri = Text.takeWhile (/= '.') $ Text.drop 1 $ Text.dropWhile (/= ':') $ decodeUtf8 $ toStrict stdOut
 
-  pure $ "https://github.com/" <> uri  <> "/compare/" <> pack (unBranch branch creationTime) <> "?expand=1"
+  pure $ "https://github.com/" <> uri  <> "/pull/new/" <> pack (unBranch branch creationTime)

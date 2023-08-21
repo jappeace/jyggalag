@@ -4,6 +4,7 @@ module Jyggalag.Copy
   )
 where
 
+import Data.Foldable(fold)
 import qualified Jyggalag.Toml as Toml
 import qualified Data.Map as Map
 import System.Directory (listDirectory, createDirectoryIfMissing, copyFile)
@@ -50,7 +51,7 @@ copyAction configFile gitContext action projectName project = do
   let fromPath = Toml.actionsPath configFile </> action
   let projectActionsPath = Toml.projectDir configFile </> Toml.path project </> workflowPath
   createDirectoryIfMissing True projectActionsPath
-  if elem action $ Toml.ignoreActions project then
+  if elem action $ fold $ Toml.ignoreActions project then
     putStrLn $ "ignoring " <> action <> " for " <> show projectName
   else do
     copyFile fromPath $ projectActionsPath </> action

@@ -31,7 +31,7 @@ actionsPath configFile =
 
 data Project = MkProject {
     path :: FilePath
-  , ignoreActions :: [FilePath]
+  , ignoreActions :: Maybe [FilePath]
   } deriving (Generic, Show)
 
 newtype ProjectName = MkProjectName String
