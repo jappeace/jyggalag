@@ -6,7 +6,9 @@ module Jyggalag.Toml
   , ProjectName(..)
   , actionsPath
   , Branch
-  , unBranch
+  , formatTimeBranch
+  , defaultRevertBranch
+  , branchToString
   )
 where
 
@@ -32,16 +34,23 @@ actionsPath configFile =
 data Project = MkProject {
     path :: FilePath
   , ignoreActions :: Maybe [FilePath]
+  , revertBranch :: Maybe Branch
   } deriving (Generic, Show)
 
 newtype ProjectName = MkProjectName String
   deriving newtype (Eq, Ord, Show)
 
+defaultRevertBranch :: Branch
+defaultRevertBranch = MkBranch "master"
+
 newtype Branch = MkBranch String
   deriving Show
 
-unBranch :: Branch -> UTCTime -> String
-unBranch (MkBranch branch) time' = branch <> "_" <> formatTime defaultTimeLocale "%Y_%m_%d__%H_%M_%S" time'
+branchToString :: Branch -> String
+branchToString (MkBranch branch) = branch
+
+formatTimeBranch :: Branch -> UTCTime -> String
+formatTimeBranch (MkBranch branch) time' = branch <> "_" <> formatTime defaultTimeLocale "%Y_%m_%d__%H_%M_%S" time'
 
 data ConfigFile = MkConfigFile {
     projectDir :: FilePath

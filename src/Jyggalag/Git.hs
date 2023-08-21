@@ -41,11 +41,19 @@ isBranchDirty MkGitContext {..} = do
   print stdOut
   pure $ stdOut /= mempty
 
+-- | This creates a branch
 setWorkBranch :: GitContext -> Branch -> IO ()
 setWorkBranch MkGitContext {..} branch = do
   runProcess_
       $ setWorkingDir (projectDir </> path project)
-      $ shell ("git checkout -B \"" <> unBranch branch creationTime <> "\" master")
+      $ shell ("git checkout -B \"" <> formatTimeBranch branch creationTime <> "\" master")
+
+revertBranch :: GitContext -> Branch -> IO ()
+revertBranch MkGitContext {..} branch = do
+  runProcess_
+      $ setWorkingDir (projectDir </> path project)
+      $ shell ("git checkout \"" <> branchToString branch <> "\"")
+
 
 addStaging :: GitContext -> FilePath -> IO ()
 addStaging MkGitContext {..} file =
@@ -64,7 +72,7 @@ push :: GitContext -> Branch -> IO Text
 push MkGitContext {..} branch = do
   runProcess_
       $ setWorkingDir (projectDir </> path project)
-      $ shell ("git push --set-upstream origin " <> unBranch branch creationTime)
+      $ shell ("git push --set-upstream origin " <> formatTimeBranch branch creationTime)
 
   stdOut <- readProcessStdout_
       $ setWorkingDir (projectDir </> path project)
@@ -72,4 +80,4 @@ push MkGitContext {..} branch = do
 
   let uri = Text.takeWhile (/= '.') $ Text.drop 1 $ Text.dropWhile (/= ':') $ decodeUtf8 $ toStrict stdOut
 
-  pure $ "https://github.com/" <> uri  <> "/pull/new/" <> pack (unBranch branch creationTime)
+  pure $ "https://github.com/" <> uri  <> "/pull/new/" <> pack (formatTimeBranch branch creationTime)

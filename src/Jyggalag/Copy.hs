@@ -35,12 +35,14 @@ commandCopy (CopyOptions path) = do
       isDirty <- Git.isBranchDirty gitContext
       if isDirty then
         pure $ "skipping project " <> Text.pack (show projectName) <> " because branch is dirty"
-      else do
-        Git.setWorkBranch gitContext $ Toml.workbranch configFile
-        forM_ actionsToBeCopied $ \action -> do
-          copyAction configFile gitContext action projectName project
-        Git.commit gitContext
-        Git.push gitContext $ Toml.workbranch configFile
+      else
+        bracket_ (Git.setWorkBranch gitContext $ Toml.workbranch configFile)
+                 -- revert cuz it's rather annoying everything stays on those jyggalag branches
+                 (Git.revertBranch gitContext $ fromMaybe defaultRevertBranch $ revertBranch project) $ do
+          forM_ actionsToBeCopied $ \action -> do
+            copyAction configFile gitContext action projectName project
+          Git.commit gitContext
+          Git.push gitContext $ Toml.workbranch configFile
 
   traverse_ Text.putStrLn uris
 
