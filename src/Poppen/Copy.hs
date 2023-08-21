@@ -14,6 +14,7 @@ import qualified Data.Text.IO as Text
 import qualified Data.Text as Text
 import Data.Foldable (traverse_)
 import Data.Traversable (forM)
+import Poppen.Git (GitContext)
 
 data CopyOptions = CopyOptions {
   configFile :: FilePath
@@ -36,20 +37,21 @@ commandCopy (CopyOptions path) = do
       else do
         Git.setWorkBranch gitContext $ Toml.workbranch configFile
         forM_ actionsToBeCopied $ \action -> do
-          copyAction configFile action projectName project
-          Git.addStaging gitContext $ workflowPath </> action
+          copyAction configFile gitContext action projectName project
         Git.commit gitContext
         Git.push gitContext $ Toml.workbranch configFile
 
   traverse_ Text.putStrLn uris
 
 
-copyAction :: Toml.ConfigFile -> FilePath -> Toml.ProjectName -> Toml.Project -> IO ()
-copyAction configFile action projectName project = do
+copyAction :: Toml.ConfigFile -> GitContext -> FilePath -> Toml.ProjectName -> Toml.Project -> IO ()
+copyAction configFile gitContext action projectName project = do
   putStrLn $ "copying over " <> action <> " into " <> show projectName
   let fromPath = Toml.actionsPath configFile </> action
   let projectActionsPath = Toml.projectDir configFile </> Toml.path project </> workflowPath
   createDirectoryIfMissing True projectActionsPath
   if elem action $ Toml.ignoreActions project then
     putStrLn $ "ignoring " <> action <> " for " <> show projectName
-  else copyFile fromPath $ projectActionsPath </> action
+  else do
+    copyFile fromPath $ projectActionsPath </> action
+    Git.addStaging gitContext $ projectActionsPath </> action
