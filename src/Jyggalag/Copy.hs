@@ -18,6 +18,7 @@ import Data.Traversable (forM)
 import Jyggalag.Git (GitContext)
 import Data.Maybe (fromMaybe)
 import UnliftIO (bracket_)
+import System.Exit (ExitCode(..))
 
 data CopyOptions = CopyOptions {
   configFile :: FilePath
@@ -38,15 +39,19 @@ commandCopy (CopyOptions path) = do
       if isDirty then
         pure $ "skipping project " <> Text.pack (show projectName) <> " because branch is dirty"
       else do
-        Git.revertSetBranch gitContext $ fromMaybe Toml.defaultRevertBranch $ Toml.revertBranch project
-        Git.pull gitContext
-        bracket_ (Git.setWorkBranch gitContext $ Toml.workbranch configFile)
-                 -- revert cuz it's rather annoying everything stays on those jyggalag branches
-                 (Git.revertSetBranch gitContext $ fromMaybe Toml.defaultRevertBranch $ Toml.revertBranch project) $ do
-          forM_ actionsToBeCopied $ \action -> do
-            copyAction configFile gitContext action projectName project
-          Git.commit gitContext
-          Git.push gitContext $ Toml.workbranch configFile
+        let defBranch = fromMaybe Toml.defaultRevertBranch $ Toml.revertBranch project
+        Git.revertSetBranch gitContext defBranch
+        exitCode <- Git.pull gitContext defBranch
+        case exitCode of
+          ExitFailure x -> pure $ "skipping project " <> Text.pack (show projectName) <> " because pull failed with " <> Text.pack (show x)
+          ExitSuccess -> do
+            bracket_ (Git.setWorkBranch gitContext $ Toml.workbranch configFile)
+                    -- revert cuz it's rather annoying everything stays on those jyggalag branches
+                    (Git.revertSetBranch gitContext $ fromMaybe Toml.defaultRevertBranch $ Toml.revertBranch project) $ do
+              forM_ actionsToBeCopied $ \action -> do
+                copyAction configFile gitContext action projectName project
+              Git.commit gitContext
+              Git.push gitContext $ Toml.workbranch configFile
 
   traverse_ Text.putStrLn uris
 

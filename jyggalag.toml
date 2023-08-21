@@ -21,6 +21,8 @@ ignoreActions = ["nightly.yaml", "cabal.yaml"]
 
 [projects.persistent_mysql_pure]
 path = "persistent"
+# we need to ignore these due to tests not being run
+ignoreActions = ["nix.yaml", "cabal.yaml"]
 
 # [projects.llvm_party]
 # path = "llvm-party"

@@ -56,11 +56,11 @@ revertSetBranch MkGitContext {..} branch = do
       $ setWorkingDir (projectDir </> path project)
       $ shell ("git checkout \"" <> branchToString branch <> "\"")
 
-pull :: GitContext -> IO ()
-pull MkGitContext {..} = do
-  runProcess_
+pull :: GitContext -> Branch -> IO ExitCode
+pull MkGitContext {..} branch = do
+  runProcess
       $ setWorkingDir (projectDir </> path project)
-      $ shell ("git pull")
+      $ shell ("git pull --ff-only origin " <> branchToString branch)
 
 addStaging :: GitContext -> FilePath -> IO ()
 addStaging MkGitContext {..} file =
