@@ -1,14 +1,16 @@
 [![https://jappieklooster.nl](https://img.shields.io/badge/blog-jappieklooster.nl-lightgrey)](https://jappieklooster.nl/tag/haskell.html)
 [![Jappiejappie](https://img.shields.io/badge/discord-jappiejappie-black?logo=discord)](https://discord.gg/Hp4agqy)
 
+![Jyggalag](https://github.com/jappeace/jyggalag/blob/master/jyggalag.png?raw=true)
+
 > Jyggalag! He is the Prince of Order. Or biscuits...no, order, Order!
 > And not in a good way. Bleak. Colorless. Dead. Boring, boring, BORING!
 
-Mostly automated large scale maintenance.
+
+Somewhat automated large scale maintenance.
 
 This project makes some basic assumptions on maintenance allowing
-you to automate a bunch of things.
-
+you to automate a various things.
 It allows setting a template project from which to copy github
 actions from.
 Planned features:

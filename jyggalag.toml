@@ -9,8 +9,8 @@ template = "haskell-template-project"
 workbranch = "jyggalag"
 
 
-# [projects.mysql_haskell]
-# path = "mysql-haskell"
+[projects.mysql_haskell]
+path = "mysql-haskell"
 
 [projects.jyggalag]
 path = "jyggalag"
@@ -24,8 +24,8 @@ path = "persistent"
 # we need to ignore these due to tests not being run
 ignoreActions = ["nix.yaml", "cabal.yaml"]
 
-# [projects.llvm_party]
-# path = "llvm-party"
+[projects.llvm_party]
+path = "llvm-party"
 
 [projects.jappie_lang]
 path = "jappie-lang"
