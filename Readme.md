@@ -1,8 +1,6 @@
 [![https://jappieklooster.nl](https://img.shields.io/badge/blog-jappieklooster.nl-lightgrey)](https://jappieklooster.nl/tag/haskell.html)
 [![Jappiejappie](https://img.shields.io/badge/discord-jappiejappie-black?logo=discord)](https://discord.gg/Hp4agqy)
 
-![Jyggalag](https://github.com/jappeace/jyggalag/blob/master/jyggalag.png?raw=true)
-
 > Jyggalag! He is the Prince of Order. Or biscuits...no, order, Order!
 > And not in a good way. Bleak. Colorless. Dead. Boring, boring, BORING!
 
@@ -47,3 +45,11 @@ make run
 ```
 make ghcid
 ```
+
+## Jyggalag
+
+[daedric prince](https://elderscrolls.fandom.com/wiki/Jyggalag) of order.
+It seems fitting since this project tries to organize many other projects.
+Just like the daedric prince of order tried to organize all daedric realms.
+
+![Jyggalag](https://github.com/jappeace/jyggalag/blob/master/jyggalag.png?raw=true)
