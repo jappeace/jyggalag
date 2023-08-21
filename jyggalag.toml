@@ -17,13 +17,13 @@ path = "jyggalag"
 
 [projects.plunder]
 path = "plunder"
-ignoreActions = ["nightly.yaml"]
+ignoreActions = ["nightly.yaml", "cabal.yaml"]
 
-# [projects.persistent_mysql_haskell]
-# path = "persistent"
+[projects.persistent_mysql_pure]
+path = "persistent"
 
 # [projects.llvm_party]
 # path = "llvm-party"
 
-# [projects.jappie_lang]
-# path = "jappie-lang"
+[projects.jappie_lang]
+path = "jappie-lang"
