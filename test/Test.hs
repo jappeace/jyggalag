@@ -5,6 +5,7 @@ import Test.Tasty.HUnit
 
 import Poppen.Toml (parseConfig)
 import Data.Functor (void)
+import Poppen()
 
 main :: IO ()
 main = defaultMain tests

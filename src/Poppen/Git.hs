@@ -18,14 +18,20 @@ import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8)
 import Data.ByteString (toStrict)
 import qualified Data.Text as Text
+import Data.Text (pack)
+import Data.Time (UTCTime)
+import Data.Time.Clock (getCurrentTime)
 
 data GitContext = MkGitContext {
     projectDir :: FilePath
   , project :: Project
+  , creationTime :: UTCTime
   }
 
-createGitContext :: FilePath -> Project -> GitContext
-createGitContext = MkGitContext
+createGitContext :: FilePath -> Project -> IO GitContext
+createGitContext projectDir project = do
+  creationTime <- getCurrentTime
+  pure $ MkGitContext {..}
 
 isBranchDirty :: GitContext -> IO Bool
 isBranchDirty MkGitContext {..} = do
@@ -40,7 +46,7 @@ setWorkBranch :: GitContext -> Branch -> IO ()
 setWorkBranch MkGitContext {..} branch = do
   runProcess_
       $ setWorkingDir (projectDir </> path project)
-      $ shell ("git checkout -B \"" <> unBranch branch <> "\" master")
+      $ shell ("git checkout -B \"" <> unBranch branch creationTime <> "\" master")
 
 addStaging :: GitContext -> FilePath -> IO ()
 addStaging MkGitContext {..} file =
@@ -59,12 +65,12 @@ push :: GitContext -> Branch -> IO Text
 push MkGitContext {..} branch = do
   runProcess_
       $ setWorkingDir (projectDir </> path project)
-      $ shell ("git push --set-upstream origin " <> unBranch branch)
+      $ shell ("git push --set-upstream origin " <> unBranch branch creationTime)
 
   stdOut <- readProcessStdout_
       $ setWorkingDir (projectDir </> path project)
       $ shell "git remote -v"
 
-  let uri = Text.takeWhile (/= '.') $ Text.dropWhile (/= ':') $ decodeUtf8 $ toStrict stdOut
+  let uri = Text.takeWhile (/= '.') $ Text.drop 1 $ Text.dropWhile (/= ':') $ decodeUtf8 $ toStrict stdOut
 
-  pure $ "https://github.com/" <> uri  <> "/compare/new-commits?expand=1"
+  pure $ "https://github.com/" <> uri  <> "/compare/" <> pack (unBranch branch creationTime) <> "?expand=1"

@@ -1,7 +1,8 @@
 [![https://jappieklooster.nl](https://img.shields.io/badge/blog-jappieklooster.nl-lightgrey)](https://jappieklooster.nl/tag/haskell.html)
 [![Jappiejappie](https://img.shields.io/badge/discord-jappiejappie-black?logo=discord)](https://discord.gg/Hp4agqy)
 
-> Am I a homogeneous dolls?
+> Jyggalag! He is the Prince of Order. Or biscuits...no, order, Order!
+> And not in a good way. Bleak. Colorless. Dead. Boring, boring, BORING!
 
 This project makes some basic assumptions on maintenance allowing
 you to automate a bunch of things.

@@ -30,7 +30,7 @@ commandCopy (CopyOptions path) = do
   actionsToBeCopied <- listDirectory $ Toml.actionsPath configFile
 
   uris <- forM (Map.toList $ Toml.projects configFile) $ \(projectName, project) ->  do
-      let gitContext = Git.createGitContext (Toml.projectDir configFile) project
+      gitContext <- Git.createGitContext (Toml.projectDir configFile) project
       isDirty <- Git.isBranchDirty gitContext
       if isDirty then
         pure $ "skipping project " <> Text.pack (show projectName) <> " because branch is dirty"

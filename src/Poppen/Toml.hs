@@ -5,7 +5,8 @@ module Poppen.Toml
   , ConfigFile(..)
   , ProjectName(..)
   , actionsPath
-  , Branch(..)
+  , Branch
+  , unBranch
   )
 where
 
@@ -16,12 +17,16 @@ import Toml.FromValue.Generic
 import Data.Foldable (traverse_)
 import Data.Map
 import System.FilePath ((</>))
+import Data.Time (UTCTime)
+import Data.Time.Format (formatTime)
+import Data.Time (defaultTimeLocale)
 
 actionsPath :: ConfigFile -> FilePath
 actionsPath configFile =
   templateProject </> ".github" </> "workflows"
   where
     templateProject = projectDir configFile </> template configFile
+
 
 
 data Project = MkProject {
@@ -32,8 +37,11 @@ data Project = MkProject {
 newtype ProjectName = MkProjectName String
   deriving newtype (Eq, Ord, Show)
 
-newtype Branch = MkBranch {unBranch :: String }
+newtype Branch = MkBranch String
   deriving Show
+
+unBranch :: Branch -> UTCTime -> String
+unBranch (MkBranch branch) time' = branch <> "_" <> formatTime defaultTimeLocale "%Y_%m_%d__%H_%M_%S" time'
 
 data ConfigFile = MkConfigFile {
     projectDir :: FilePath

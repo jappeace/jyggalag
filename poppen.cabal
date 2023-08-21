@@ -59,6 +59,7 @@ common common-options
       , typed-process
       , text
       , bytestring
+      , time
 
   default-language: Haskell2010
 

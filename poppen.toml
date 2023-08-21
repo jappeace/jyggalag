@@ -2,7 +2,7 @@ projectDir = "/home/jappie/projects"
 template = "haskell-template-project"
 
 # which branch to checkout from master
-workbranch = "dollhouse-changes"
+workbranch = "jyggalag-update"
 
 # [projects.mysql_haskell]
 # path = "mysql-haskell"
