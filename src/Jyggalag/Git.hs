@@ -8,6 +8,7 @@ module Jyggalag.Git
   , commit
   , push
   , GitContext
+  , revertSetBranch
   )
 where
 
@@ -48,8 +49,8 @@ setWorkBranch MkGitContext {..} branch = do
       $ setWorkingDir (projectDir </> path project)
       $ shell ("git checkout -B \"" <> formatTimeBranch branch creationTime <> "\" master")
 
-revertBranch :: GitContext -> Branch -> IO ()
-revertBranch MkGitContext {..} branch = do
+revertSetBranch :: GitContext -> Branch -> IO ()
+revertSetBranch MkGitContext {..} branch = do
   runProcess_
       $ setWorkingDir (projectDir </> path project)
       $ shell ("git checkout \"" <> branchToString branch <> "\"")

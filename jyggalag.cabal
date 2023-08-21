@@ -60,6 +60,7 @@ common common-options
       , text
       , bytestring
       , time
+      , unliftio
 
   default-language: Haskell2010
 

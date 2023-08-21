@@ -16,6 +16,8 @@ import qualified Data.Text as Text
 import Data.Foldable (traverse_)
 import Data.Traversable (forM)
 import Jyggalag.Git (GitContext)
+import Data.Maybe (fromMaybe)
+import UnliftIO (bracket_)
 
 data CopyOptions = CopyOptions {
   configFile :: FilePath
@@ -38,7 +40,7 @@ commandCopy (CopyOptions path) = do
       else
         bracket_ (Git.setWorkBranch gitContext $ Toml.workbranch configFile)
                  -- revert cuz it's rather annoying everything stays on those jyggalag branches
-                 (Git.revertBranch gitContext $ fromMaybe defaultRevertBranch $ revertBranch project) $ do
+                 (Git.revertSetBranch gitContext $ fromMaybe Toml.defaultRevertBranch $ Toml.revertBranch project) $ do
           forM_ actionsToBeCopied $ \action -> do
             copyAction configFile gitContext action projectName project
           Git.commit gitContext
