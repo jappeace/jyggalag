@@ -1,4 +1,4 @@
-# Change log for poppen
+# Change log for jyggalag
 
 ## Version 0.1.0 
 

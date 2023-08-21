@@ -16,7 +16,7 @@
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
       hpkgs = pkgs.haskellPackages.override {
         overrides = hnew: hold: {
-          poppen = hnew.callCabal2nix "poppen" ./. { };
+          jyggalag = hnew.callCabal2nix "jyggalag" ./. { };
           # test suite has to tight bounds
           toml-parser = pkgs.haskell.lib.doJailbreak (hold.callHackageDirect {
               pkg = "toml-parser";
@@ -27,10 +27,10 @@
       };
     in
     {
-      defaultPackage.x86_64-linux =  hpkgs.poppen;
+      defaultPackage.x86_64-linux =  hpkgs.jyggalag;
       inherit pkgs;
       devShell.x86_64-linux = hpkgs.shellFor {
-        packages = ps : [ ps."poppen" ];
+        packages = ps : [ ps."jyggalag" ];
         withHoogle = true;
 
         buildInputs = [

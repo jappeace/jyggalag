@@ -1,5 +1,5 @@
 -- | Wraps the toml-parser library to create a ConfigFile
-module Poppen.Toml
+module Jyggalag.Toml
   ( parseConfig
   , Project(..)
   , ConfigFile(..)

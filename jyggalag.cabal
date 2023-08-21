@@ -1,9 +1,9 @@
 cabal-version:      3.0
 
-name:           poppen
+name:           jyggalag
 version:        1.0.0
-homepage:       https://github.com/jappeace/poppen#readme
-bug-reports:    https://github.com/jappeace/poppen/issues
+homepage:       https://github.com/jappeace/jyggalag#readme
+bug-reports:    https://github.com/jappeace/jyggalag/issues
 author:         Jappie Klooster
 maintainer:     jappieklooster@hotmail.com
 copyright:      2023 Jappie Klooster
@@ -17,7 +17,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/jappeace/poppen
+  location: https://github.com/jappeace/jyggalag
 
 common common-options
   default-extensions: 
@@ -66,12 +66,12 @@ common common-options
 library
   import: common-options
   exposed-modules:
-      Poppen
-      Poppen.Copy
-      Poppen.Toml
-      Poppen.Git
+      Jyggalag
+      Jyggalag.Copy
+      Jyggalag.Toml
+      Jyggalag.Git
   other-modules:
-      Paths_poppen
+      Paths_jyggalag
   hs-source-dirs:
       src
 
@@ -81,7 +81,7 @@ executable exe
   hs-source-dirs:
       app
   build-depends:
-      poppen
+      jyggalag
   ghc-options: -Wno-unused-packages
 
 test-suite unit
@@ -90,11 +90,11 @@ test-suite unit
   main-is: Test.hs
   ghc-options: -Wno-unused-packages
   other-modules:
-      Paths_poppen
+      Paths_jyggalag
   hs-source-dirs:
       test
   build-depends:
       tasty,
       tasty-hunit,
       tasty-quickcheck,
-      poppen
+      jyggalag

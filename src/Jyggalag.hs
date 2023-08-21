@@ -1,10 +1,10 @@
-module Poppen
+module Jyggalag
   ( main
   )
 where
 
 import Options.Applicative
-import Poppen.Copy
+import Jyggalag.Copy
 import Data.Foldable (fold)
 
 data Commands = NoOp
@@ -16,7 +16,7 @@ notifyRun = \case
   CopyOverActions _ -> putStrLn "running copy over github actions"
 
 parseConfigFile :: Parser FilePath
-parseConfigFile = strOption $ long "config" <> metavar "FILE" <> help "the configuration file" <> value "poppen.toml"
+parseConfigFile = strOption $ long "config" <> metavar "FILE" <> help "the configuration file" <> value "jyggalag.toml"
 
 parseOptions :: Parser Commands
 parseOptions = hsubparser $
@@ -43,6 +43,6 @@ readCliOptions :: IO Commands
 readCliOptions = do
   customExecParser (prefs showHelpOnError) $ info
     (helper <*> parseOptions)
-    (fullDesc <> Options.Applicative.header "Poppen" <> progDesc
+    (fullDesc <> Options.Applicative.header "Jyggalag" <> progDesc
       "Helps managing many opensoure project by standardization"
     )

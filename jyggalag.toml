@@ -7,8 +7,8 @@ workbranch = "jyggalag-update"
 # [projects.mysql_haskell]
 # path = "mysql-haskell"
 
-# [projects.poppen]
-# path = "poppen"
+# [projects.jyggalag]
+# path = "jyggalag"
 
 [projects.plunder]
 path = "plunder"

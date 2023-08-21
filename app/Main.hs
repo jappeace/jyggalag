@@ -1,7 +1,7 @@
 
 module Main where
 
-import qualified Poppen
+import qualified Jyggalag
 
 main :: IO ()
-main = Poppen.main
+main = Jyggalag.main

@@ -1,20 +1,20 @@
-module Poppen.Copy
+module Jyggalag.Copy
   ( commandCopy
   , CopyOptions(..)
   )
 where
 
-import qualified Poppen.Toml as Toml
+import qualified Jyggalag.Toml as Toml
 import qualified Data.Map as Map
 import System.Directory (listDirectory, createDirectoryIfMissing, copyFile)
 import System.FilePath ((</>))
 import Control.Monad (forM_)
-import qualified Poppen.Git as Git
+import qualified Jyggalag.Git as Git
 import qualified Data.Text.IO as Text
 import qualified Data.Text as Text
 import Data.Foldable (traverse_)
 import Data.Traversable (forM)
-import Poppen.Git (GitContext)
+import Jyggalag.Git (GitContext)
 
 data CopyOptions = CopyOptions {
   configFile :: FilePath

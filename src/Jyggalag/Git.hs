@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 -- | Allows us to anwser questions and do action to git repositories
-module Poppen.Git
+module Jyggalag.Git
   ( isBranchDirty
   , setWorkBranch
   , addStaging
@@ -11,7 +11,7 @@ module Poppen.Git
   )
 where
 
-import Poppen.Toml
+import Jyggalag.Toml
 import System.Process.Typed
 import System.FilePath ((</>))
 import Data.Text (Text)
@@ -40,7 +40,6 @@ isBranchDirty MkGitContext {..} = do
       $ shell "git status --porcelain=v2"
   print stdOut
   pure $ stdOut /= mempty
-
 
 setWorkBranch :: GitContext -> Branch -> IO ()
 setWorkBranch MkGitContext {..} branch = do
