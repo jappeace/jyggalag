@@ -2,10 +2,10 @@
 # this has no nesting.
 projectDir = "/home/jappie/projects"
 
-# this is the template from where to copy from
+# required: this is the template from where to copy from
 template = "haskell-template-project"
 
-# which branch to checkout from master
+# required: which branch to checkout from master
 workbranch = "jyggalag"
 
 

@@ -10,6 +10,14 @@ import Jyggalag.Toml
 import Options.Applicative
 import System.Environment (getProgName)
 import Data.Foldable
+import Data.Text.Encoding
+import Jyggalag.Git (runGitStdOut, withGit, runGitExitCode)
+import System.Process.Typed
+import Data.ByteString.Lazy (toStrict)
+import qualified Data.Text as Text
+import Data.String
+import Data.Maybe (listToMaybe)
+import Control.Monad.IO.Class
 
 data HackageOptions = HackageOptions {
   configFile :: FilePath
@@ -18,21 +26,42 @@ data HackageOptions = HackageOptions {
 commandUploadHackage :: HackageOptions -> IO ()
 commandUploadHackage (HackageOptions path) = do
   configFile <- Toml.parseConfig path
-  let projecList = Map.toList (projects configFile)
-  _projectAnwsers <- traverse withProject projecList
-  putStrLn "totally uploading"
 
-data ShouldUpload = Upload Project
-                  | Skip
+  let projecList = Map.toList (projects configFile)
+  projectAnwsers <- traverse withProject projecList
+
+  traverse_  (upload configFile) projectAnwsers
+  putStrLn "uploading complete"
+
+
+upload :: ConfigFile -> ShouldUpload -> IO ()
+upload configFile = \case
+    (Skip name') -> putStrLn ("skipping" <> show name')
+    (Upload projectName project) -> withGit (Toml.projectDir configFile) project $ do
+      liftIO $ putStrLn ("uploading " <> show projectName)
+      out <- runGitStdOut $ shell "cabal sdist"
+      let txt = decodeUtf8 $ toStrict out
+      case listToMaybe $ drop 1 $ Text.lines txt of
+        Nothing -> error "no sdist output found"
+        Just distOutput -> do
+          exit <- runGitExitCode $ shell $ fromString $ "cabal upload --publish " <> Text.unpack distOutput
+          liftIO $ putStrLn $ case exit of
+            ExitFailure x -> "uploading failed for " <> (show projectName) <> " because " <> show x
+            ExitSuccess -> "upload success for " <> show projectName
+
+
+
+data ShouldUpload = Upload ProjectName Project
+                  | Skip ProjectName
 
 parseOptions :: ProjectName -> Project -> Parser ShouldUpload
 parseOptions name' project = hsubparser $
   fold [
   command "y"
-    (info (pure (Upload project))
+    (info (pure (Upload name' project))
       (progDesc $ "upload " <> show name'))
   , command "n"
-    (info (pure Skip)
+    (info (pure $ Skip name')
      (progDesc $ "skip " <> show name' ))
   ]
 

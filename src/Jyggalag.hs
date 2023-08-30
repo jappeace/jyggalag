@@ -28,7 +28,7 @@ parseOptions = hsubparser $
       (progDesc "copy over the actions in the managed projects"))
   , command "upload-hackage"
     (info (UploadHackage . HackageOptions <$> parseConfigFile)
-     (progDesc "goes over your projects, ask one by one if they need to be published, and does so, doing a version bump if required and updating the changelog"))
+     (progDesc "goes over your projects, ask one by one if they need to be published, and does so, use `cabal user-config update` to find out the file to put in your username and password ~/.cabal/config on my machine."))
   ]
 
 main :: IO ()
