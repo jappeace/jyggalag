@@ -13,6 +13,6 @@ main = defaultMain tests
 
 tests :: TestTree
 tests = testGroup "Unit tests"
-  [testCase "parse config file" $ do
-      void $ parseConfig "./jyggalag.toml"
+  [testCase "parse the config file example" $ do
+      void $ parseConfig "./jyggalag-example.toml"
   ]

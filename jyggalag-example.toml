@@ -14,3 +14,8 @@ path = "mysql-haskell"
 
 [projects.jyggalag]
 path = "jyggalag"
+
+[projects.persistent_mysql_pure]
+path = "persistent"
+# we need to ignore these due to tests not being run
+ignoreActions = ["nix.yaml", "cabal.yaml"]
