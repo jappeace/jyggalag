@@ -1,4 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use void" #-}
+
 -- | Allows us to anwser questions and do action to git repositories
 module Jyggalag.Git
   ( isBranchDirty
@@ -49,7 +52,7 @@ withGit projectDir project someMonad = do
   runReaderT (runMonadGit someMonad) ctx
 
 runGit_ :: ProcessConfig stdin stdout stderr -> MonadGit ()
-runGit_ = void . runGitExitCode
+runGit_ x = () <$ runGitExitCode x
 
 runGitStdOut :: ProcessConfig stdin stdout stderr -> MonadGit ByteString
 runGitStdOut processConfig = do
