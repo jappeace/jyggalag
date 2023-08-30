@@ -53,6 +53,8 @@ common common-options
       base >=4.9.1.0 && <4.19.0.0
       , optparse-applicative
       , toml-parser
+      , transformers
+      , mtl
       , containers
       , directory
       , filepath

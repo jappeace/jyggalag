@@ -15,10 +15,10 @@ import qualified Data.Text.IO as Text
 import qualified Data.Text as Text
 import Data.Foldable (traverse_)
 import Data.Traversable (forM)
-import Jyggalag.Git (GitContext)
+import Jyggalag.Git (MonadGit)
 import Data.Maybe (fromMaybe)
-import UnliftIO (bracket_)
 import System.Exit (ExitCode(..))
+import Control.Monad.IO.Class
 
 data CopyOptions = CopyOptions {
   configFile :: FilePath
@@ -33,36 +33,33 @@ commandCopy (CopyOptions path) = do
 
   actionsToBeCopied <- listDirectory $ Toml.actionsPath configFile
 
-  uris <- forM (Map.toList $ Toml.projects configFile) $ \(projectName, project) ->  do
-      gitContext <- Git.createGitContext (Toml.projectDir configFile) project
-      isDirty <- Git.isBranchDirty gitContext
+  uris <- forM (Map.toList $ Toml.projects configFile) $ \(projectName, project) ->
+    Git.withGit (Toml.projectDir configFile) project $ do
+      isDirty <- Git.isBranchDirty
       if isDirty then
         pure $ "skipping project " <> Text.pack (show projectName) <> " because branch is dirty"
       else do
         let defBranch = fromMaybe Toml.defaultRevertBranch $ Toml.revertBranch project
-        Git.revertSetBranch gitContext defBranch
-        exitCode <- Git.pull gitContext defBranch
+        Git.checkout defBranch
+        exitCode <- Git.pull defBranch
         case exitCode of
           ExitFailure x -> pure $ "skipping project " <> Text.pack (show projectName) <> " because pull failed with " <> Text.pack (show x)
-          ExitSuccess -> do
-            bracket_ (Git.setWorkBranch gitContext $ Toml.workbranch configFile)
-                    -- revert cuz it's rather annoying everything stays on those jyggalag branches
-                    (Git.revertSetBranch gitContext $ fromMaybe Toml.defaultRevertBranch $ Toml.revertBranch project) $ do
+          ExitSuccess -> Git.workOnBranch (Toml.workbranch configFile) $ do
               forM_ actionsToBeCopied $ \action -> do
-                copyAction configFile gitContext action projectName project
-              Git.commit gitContext
-              Git.push gitContext $ Toml.workbranch configFile
+                copyAction configFile action projectName project
+              Git.commit
+              Git.push $ Toml.workbranch configFile
 
   traverse_ Text.putStrLn uris
 
-copyAction :: Toml.ConfigFile -> GitContext -> FilePath -> Toml.ProjectName -> Toml.Project -> IO ()
-copyAction configFile gitContext action projectName project = do
-  putStrLn $ "copying over " <> action <> " into " <> show projectName
+copyAction :: Toml.ConfigFile -> FilePath -> Toml.ProjectName -> Toml.Project -> MonadGit ()
+copyAction configFile action projectName project = do
+  liftIO $ putStrLn $ "copying over " <> action <> " into " <> show projectName
   let fromPath = Toml.actionsPath configFile </> action
   let projectActionsPath = Toml.projectDir configFile </> Toml.path project </> workflowPath
-  createDirectoryIfMissing True projectActionsPath
+  liftIO $ createDirectoryIfMissing True projectActionsPath
   if elem action $ fold $ Toml.ignoreActions project then
-    putStrLn $ "ignoring " <> action <> " for " <> show projectName
+    liftIO $ putStrLn $ "ignoring " <> action <> " for " <> show projectName
   else do
-    copyFile fromPath $ projectActionsPath </> action
-    Git.addStaging gitContext $ projectActionsPath </> action
+    liftIO $ copyFile fromPath $ projectActionsPath </> action
+    Git.addStaging $ projectActionsPath </> action

@@ -2,14 +2,15 @@
 -- | Allows us to anwser questions and do action to git repositories
 module Jyggalag.Git
   ( isBranchDirty
-  , setWorkBranch
   , addStaging
-  , createGitContext
   , pull
   , commit
   , push
   , GitContext
-  , revertSetBranch
+  , MonadGit
+  , withGit
+  , workOnBranch
+  , checkout
   )
 where
 
@@ -23,6 +24,11 @@ import qualified Data.Text as Text
 import Data.Text (pack)
 import Data.Time (UTCTime)
 import Data.Time.Clock (getCurrentTime)
+import Control.Monad.Reader
+import UnliftIO (MonadUnliftIO)
+import Data.ByteString.Lazy(ByteString)
+import UnliftIO.Exception (bracket_)
+import Data.Maybe (fromMaybe)
 
 data GitContext = MkGitContext {
     projectDir :: FilePath
@@ -30,60 +36,76 @@ data GitContext = MkGitContext {
   , creationTime :: UTCTime
   }
 
+newtype MonadGit a = MonadGit { runMonadGit :: (ReaderT GitContext IO) a }
+  deriving newtype (Functor, Applicative, Monad,
+                    MonadUnliftIO,
+                    MonadIO,
+                    MonadReader GitContext)
+
+
+withGit :: FilePath -> Project -> MonadGit a -> IO a
+withGit projectDir project someMonad = do
+  ctx <- createGitContext projectDir project
+  runReaderT (runMonadGit someMonad) ctx
+
+runGit_ :: ProcessConfig stdin stdout stderr -> MonadGit ()
+runGit_ = void . runGitExitCode
+
+runGitStdOut :: ProcessConfig stdin stdout stderr -> MonadGit ByteString
+runGitStdOut processConfig = do
+  MkGitContext {..} <- ask
+  readProcessStdout_ $ setWorkingDir (projectDir </> path project) processConfig
+
+runGitExitCode :: ProcessConfig stdin stdout stderr -> MonadGit ExitCode
+runGitExitCode processConfig = do
+  MkGitContext {..} <- ask
+  runProcess $ setWorkingDir (projectDir </> path project) processConfig
+
 createGitContext :: FilePath -> Project -> IO GitContext
 createGitContext projectDir project = do
   creationTime <- getCurrentTime
   pure $ MkGitContext {..}
 
-isBranchDirty :: GitContext -> IO Bool
-isBranchDirty MkGitContext {..} = do
-  stdOut <- readProcessStdout_
-      $ setWorkingDir (projectDir </> path project)
-      $ shell "git status --porcelain=v2"
-  print stdOut
+isBranchDirty :: MonadGit Bool
+isBranchDirty = do
+  stdOut <- runGitStdOut $ shell "git status --porcelain=v2"
   pure $ stdOut /= mempty
 
+workOnBranch :: Branch -> MonadGit a -> MonadGit a
+workOnBranch branch gitSpells = do
+  MkGitContext {..} <- ask
+  bracket_ (setWorkBranch branch) (checkout $ fromMaybe defaultRevertBranch $ revertBranch project) gitSpells
+
 -- | This creates a branch
-setWorkBranch :: GitContext -> Branch -> IO ()
-setWorkBranch MkGitContext {..} branch = do
-  runProcess_
-      $ setWorkingDir (projectDir </> path project)
-      $ shell ("git checkout -B \"" <> formatTimeBranch branch creationTime <> "\" master")
+setWorkBranch :: Branch -> MonadGit ()
+setWorkBranch branch = do
+  MkGitContext {..} <- ask
+  runGit_ $ shell ("git checkout -B \"" <> formatTimeBranch branch creationTime <> "\" master")
 
-revertSetBranch :: GitContext -> Branch -> IO ()
-revertSetBranch MkGitContext {..} branch = do
-  runProcess_
-      $ setWorkingDir (projectDir </> path project)
-      $ shell ("git checkout \"" <> branchToString branch <> "\"")
+-- TOOD this shouldn't be a branch but any tag
+checkout :: Branch -> MonadGit ()
+checkout branch =
+  runGit_ $ shell ("git checkout \"" <> branchToString branch <> "\"")
 
-pull :: GitContext -> Branch -> IO ExitCode
-pull MkGitContext {..} branch = do
-  runProcess
-      $ setWorkingDir (projectDir </> path project)
+pull :: Branch -> MonadGit ExitCode
+pull branch = do
+  runGitExitCode
       $ shell ("git pull --ff-only origin " <> branchToString branch)
 
-addStaging :: GitContext -> FilePath -> IO ()
-addStaging MkGitContext {..} file =
-  runProcess_
-      $ setWorkingDir (projectDir </> path project)
-      $ shell $ "git add \"" <> file <> "\""
+addStaging :: FilePath -> MonadGit ()
+addStaging file =
+  runGit_ $ shell $ "git add \"" <> file <> "\""
 
 
-commit :: GitContext -> IO ()
-commit MkGitContext {..} =
-  runProcess_
-      $ setWorkingDir (projectDir </> path project)
-      $ shell "git commit -m \"jyggalag update\n\n See https://github.com/jappeace/jyggalag\""
+commit :: MonadGit ()
+commit =
+  runGit_ $ shell "git commit -m \"jyggalag update\n\n See https://github.com/jappeace/jyggalag\""
 
-push :: GitContext -> Branch -> IO Text
-push MkGitContext {..} branch = do
-  runProcess_
-      $ setWorkingDir (projectDir </> path project)
-      $ shell ("git push --set-upstream origin " <> formatTimeBranch branch creationTime)
-
-  stdOut <- readProcessStdout_
-      $ setWorkingDir (projectDir </> path project)
-      $ shell "git remote -v"
+push :: Branch -> MonadGit Text
+push branch = do
+  MkGitContext {..} <- ask
+  runGit_ $ shell ("git push --set-upstream origin " <> formatTimeBranch branch creationTime)
+  stdOut <- runGitStdOut $ shell "git remote -v"
 
   let uri = Text.takeWhile (/= '.') $ Text.drop 1 $ Text.dropWhile (/= ':') $ decodeUtf8 $ toStrict stdOut
 
