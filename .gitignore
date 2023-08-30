@@ -10,3 +10,5 @@ TAGS
 *.o
 .envrc
 /.direnv/
+
+jyggalag.toml
