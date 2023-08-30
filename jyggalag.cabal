@@ -54,7 +54,6 @@ common common-options
       base >=4.9.1.0 && <4.19.0.0
       , optparse-applicative
       , toml-parser
-      , transformers
       , mtl
       , containers
       , directory
@@ -74,6 +73,7 @@ library
       Jyggalag.Copy
       Jyggalag.Toml
       Jyggalag.Git
+      Jyggalag.Hackage
   other-modules:
       Paths_jyggalag
   hs-source-dirs:

@@ -14,6 +14,9 @@ module Jyggalag.Git
   , withGit
   , workOnBranch
   , checkout
+  , runGitStdOut
+  , runGit_
+  , runGitExitCode
   )
 where
 
