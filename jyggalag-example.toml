@@ -1,0 +1,34 @@
+# we assume all your projects exist in a single directory
+# this has no nesting.
+projectDir = "/home/jappie/projects"
+
+# this is the template from where to copy from
+template = "haskell-template-project"
+
+# which branch to checkout from master
+workbranch = "jyggalag"
+
+
+[projects.mysql_haskell]
+path = "mysql-haskell"
+
+[projects.jyggalag]
+path = "jyggalag"
+
+[projects.plunder]
+path = "plunder"
+ignoreActions = ["nightly.yaml", "cabal.yaml"]
+
+[projects.persistent_mysql_pure]
+path = "persistent"
+# we need to ignore these due to tests not being run
+ignoreActions = ["nix.yaml", "cabal.yaml"]
+
+[projects.llvm_party]
+path = "llvm-party"
+
+[projects.jappie_lang]
+path = "jappie-lang"
+
+[projects.esqueleto_text_search]
+path = "esqueleto-textsearch"
