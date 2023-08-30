@@ -6,14 +6,15 @@ where
 import Options.Applicative
 import Jyggalag.Copy
 import Data.Foldable (fold)
+import Jyggalag.Hackage
 
-data Commands = NoOp
-              | CopyOverActions CopyOptions
+data Commands = CopyOverActions CopyOptions
+              | UploadHackage HackageOptions
 
 notifyRun :: Commands -> IO ()
 notifyRun = \case
-  NoOp -> putStrLn ""
   CopyOverActions _ -> putStrLn "running copy over github actions"
+  UploadHackage _ -> putStrLn "running upload hackage"
 
 parseConfigFile :: Parser FilePath
 parseConfigFile = strOption $ long "config" <> metavar "FILE" <> help "the configuration file" <> value "jyggalag.toml"
@@ -21,13 +22,13 @@ parseConfigFile = strOption $ long "config" <> metavar "FILE" <> help "the confi
 parseOptions :: Parser Commands
 parseOptions = hsubparser $
   fold [
-  command "no-op"
-    (info (pure NoOp)
-      (progDesc "does nothing"))
-  ,
+
   command "copy"
     (info (CopyOverActions . CopyOptions  <$> parseConfigFile )
       (progDesc "copy over the actions in the managed projects"))
+  , command "upload-hackage"
+    (info (UploadHackage . HackageOptions <$> parseConfigFile)
+     (progDesc "goes over your projects, ask one by one if they need to be published, and does so, doing a version bump if required and updating the changelog"))
   ]
 
 main :: IO ()
@@ -36,8 +37,7 @@ main = do
   notifyRun commands
   case commands of
     CopyOverActions copyOptions -> commandCopy copyOptions
-    NoOp -> putStrLn "do nothing"
-
+    UploadHackage options -> commandUploadHackage options
 
 readCliOptions :: IO Commands
 readCliOptions = do
