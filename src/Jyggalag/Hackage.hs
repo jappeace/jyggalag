@@ -1,3 +1,7 @@
+-- | Upload to hackage
+--   this attempts to upload, failures are expected.
+--   if a version isn't bumped this will just fail.
+--   if you made a mistake, just bump minor version and re-upload.
 module Jyggalag.Hackage
   ( commandUploadHackage
   , HackageOptions(..)
@@ -7,8 +11,6 @@ where
 import qualified Jyggalag.Toml as Toml
 import qualified Data.Map as Map
 import Jyggalag.Toml
-import Options.Applicative
-import System.Environment (getProgName)
 import Data.Foldable
 import Data.Text.Encoding
 import Jyggalag.Git (runGitStdOut, withGit, runGitExitCode)
@@ -28,15 +30,14 @@ commandUploadHackage (HackageOptions path) = do
   configFile <- Toml.parseConfig path
 
   let projecList = Map.toList (projects configFile)
-  projectAnwsers <- traverse withProject projecList
-
-  traverse_  (upload configFile) projectAnwsers
+  traverse_  (upload configFile) $ withProject <$> projecList
   putStrLn "uploading complete"
 
 
 upload :: ConfigFile -> ShouldUpload -> IO ()
 upload configFile = \case
-    (Skip name') -> putStrLn ("skipping" <> show name')
+    (NotSet name') -> putStrLn $ "ignoring " <> show name' <> " upload because upload wasn't set"
+    (Skip name') -> putStrLn $ "ignoring upload for " <> show name' <> " because  upload was set to false"
     (Upload projectName project) -> withGit (Toml.projectDir configFile) project $ do
       liftIO $ putStrLn ("uploading " <> show projectName)
       out <- runGitStdOut $ shell "cabal sdist"
@@ -53,38 +54,11 @@ upload configFile = \case
 
 data ShouldUpload = Upload ProjectName Project
                   | Skip ProjectName
+                  | NotSet ProjectName
 
-parseOptions :: ProjectName -> Project -> Parser ShouldUpload
-parseOptions name' project = hsubparser $
-  fold [
-  command "y"
-    (info (pure (Upload name' project))
-      (progDesc $ "upload " <> show name'))
-  , command "n"
-    (info (pure $ Skip name')
-     (progDesc $ "skip " <> show name' ))
-  ]
-
-withProject :: (ProjectName, Project) -> IO ShouldUpload
-withProject (name, project) = do
-  putStrLn $ "should upload " <> show name <> "? (y = upload/n = skip)"
-  line'  <- getLine
-  let  result :: ParserResult ShouldUpload
-       result = execParserPure (prefs showHelpOnError) (info
-              (helper <*> (parseOptions name project))
-              (fullDesc <> Options.Applicative.header "Jyggalag" <> progDesc
-                "Helps managing many opensoure project by standardization"
-              )) $ words line'
-
-  case result of
-      Success x -> pure x
-      Failure failure -> do
-        progn <- getProgName
-        let (msg, _exit) = renderFailure failure progn
-        putStrLn msg
-        withProject (name, project)
-      (CompletionInvoked compl) -> do
-        progn <- getProgName
-        msg <- execCompletion compl progn
-        putStrLn msg
-        withProject (name, project)
+withProject :: (ProjectName, Project) -> ShouldUpload
+withProject (name, project) =
+  case (release project) of
+    Nothing -> NotSet name
+    Just False -> Skip name
+    Just True -> Upload name project
