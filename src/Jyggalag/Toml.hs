@@ -29,12 +29,11 @@ actionsPath configFile =
   where
     templateProject = projectDir configFile </> template configFile
 
-
-
 data Project = MkProject {
     path :: FilePath
   , ignoreActions :: Maybe [FilePath]
   , revertBranch :: Maybe Branch
+  , release :: Maybe Bool -- ^ Nothing or false for no relase
   } deriving (Generic, Show)
 
 newtype ProjectName = MkProjectName String
