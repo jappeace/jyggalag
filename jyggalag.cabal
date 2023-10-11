@@ -51,18 +51,18 @@ common common-options
     -fenable-th-splice-warnings
 
   build-depends:
-      base >=4.9.1.0 && <4.19.0.0
-      , optparse-applicative
-      , toml-parser
-      , mtl
-      , containers
-      , directory
-      , filepath
-      , typed-process
-      , text
-      , bytestring
-      , time
-      , unliftio
+      base >=4.9.1.0 && <4.19.0.0,
+      optparse-applicative,
+      toml-parser,
+      mtl,
+      containers,
+      directory,
+      filepath,
+      typed-process,
+      text,
+      bytestring,
+      time,
+      unliftio
 
   default-language: Haskell2010
 
